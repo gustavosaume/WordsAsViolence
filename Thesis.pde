@@ -1,5 +1,8 @@
 // Run this program only in the Java mode inside the IDE,
 // not on Processing.js (web mode)!!
+/* @pjs preload="blood1.png"; */
+/* @pjs preload="blood3.png"; */
+/* @pjs preload="blood2.png"; */
 
 import processing.video.*;
 
@@ -62,9 +65,9 @@ void setup() {
   font = createFont("Extrude.ttf", 32);
   textAlign(CENTER);
   
-  bruiseLow = loadImage("blood 2.png");
-  bruiseMedium = loadImage("blood 1.png");
-  bruiseHigh = loadImage("blood 3.png");
+  bruiseLow = loadImage("blood2.png");
+  bruiseMedium = loadImage("blood1.png");
+  bruiseHigh = loadImage("blood3.png");
   
   initialTime = millis();
 }
