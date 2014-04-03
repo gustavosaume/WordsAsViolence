@@ -9,7 +9,7 @@ import processing.video.*;
 PFont font;
 Capture cam;
 int viewWidth = 1024;
-int viewHeight = 720;
+int viewHeight = 768;
 int cycleDuration = 2000; // Miliseconds
 int currentTime;
 int initialTime;
@@ -57,12 +57,13 @@ float levelTwoInitialTime = levelOneInitialTime + (levelOneMessages.length * cyc
 float finalTime = levelTwoInitialTime + (levelTwoMessages.length * cycleDuration);
 
 void setup() {
-  size(viewWidth, viewHeight);
+  size(1024, 768);
   cam = new Capture(this, viewWidth, viewHeight, 24);
   cam.start();
  
   // Configure font
-  font = createFont("Extrude.ttf", 32);
+  font = loadFont("Extrude-32.vlw");
+  textFont(font, 32);
   textAlign(CENTER);
   
   bruiseLow = loadImage("blood2.png");
