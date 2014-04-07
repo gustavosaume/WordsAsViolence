@@ -10,7 +10,7 @@ PFont font;
 Capture cam;
 int viewWidth = 1024;
 int viewHeight = 768;
-int cycleDuration = 2000; // Miliseconds
+int cycleDuration = 2400; // Miliseconds
 int currentTime;
 int initialTime;
 
@@ -41,9 +41,11 @@ String[] levelTwoMessages = {
   "LEVEL 2",
   "A WOMAN THAT HAS LOTS OF SEX IS CALLED...",
   "SLUT",
-  "NYMPHO",
+  "NYMPHOMANIAC",
   "TART",
-  "HUSTLER",
+  "TRAMP",
+  "SKANK",
+  "HOOCHIE MAMA",
   "SEXPOT",
   "HOOKER",
   "BITCH",
@@ -51,10 +53,28 @@ String[] levelTwoMessages = {
   "GAME OVER"  
 };
 
+color[] highSelfSteemColors = {
+  color(173,221,142),  // Light green
+  color(120,198,121),
+  color(65,171,93),
+  color(35,132,67),
+  color(0,104,55),
+  color(0,69,41)       // Dark green
+};
+
+color[] lowSelfSteemColors = {
+  color(252,78,42),
+  color(227,26,28),
+  color(189,0,38),
+  color(128,0,38)    // Dark Red
+};
+
+
 float introInitialTime = 0;
 float levelOneInitialTime = introMessages.length * cycleDuration;
 float levelTwoInitialTime = levelOneInitialTime + (levelOneMessages.length * cycleDuration);
 float finalTime = levelTwoInitialTime + (levelTwoMessages.length * cycleDuration);
+int currentIndex = -1;
 
 void setup() {
   size(1024, 768);
@@ -102,7 +122,7 @@ void draw() {
 }
 
 boolean shouldPlayIntro() {
-   return currentTime <= levelOneInitialTime;
+   return currentTime < levelOneInitialTime;
 }
 
 boolean shouldPlayLevelOne() {
@@ -114,8 +134,9 @@ boolean shouldPlayLevelTwo() {
 }
 
 void playIntro() {
-  int levelIndex = floor((currentTime/2)/1000);
+  int levelIndex = floor(currentTime/cycleDuration);
   printMiddleMessage(introMessages[levelIndex]);
+  sayMessageForIndex(introMessages[levelIndex], levelIndex);
   
   if (levelIndex > 0) {
     drawFace();
@@ -123,8 +144,10 @@ void playIntro() {
 }
 
 void playLevelOne() {
-  int levelIndex = floor((currentTime/2)/1000) - introMessages.length;
+  int levelIndex = floor(currentTime/cycleDuration) - introMessages.length;
+  
   printBottomMessage(levelOneMessages[levelIndex]);
+  sayMessageForIndex(levelOneMessages[levelIndex], levelIndex);
   
   if (levelIndex > 2 && levelIndex < levelOneMessages.length - 1) {
     drawSelfSteemWithLevel(levelIndex - 2); 
@@ -134,7 +157,7 @@ void playLevelOne() {
 }
 
 void playLevelTwo() {
-  int levelIndex = floor((currentTime/2)/1000) - introMessages.length - levelOneMessages.length;
+  int levelIndex = floor(currentTime/cycleDuration) - introMessages.length - levelOneMessages.length;
   
   
   if (levelIndex > 0 && levelIndex < levelTwoMessages.length - 1) {
@@ -167,6 +190,8 @@ void playLevelTwo() {
   else {
      printMiddleMessage(levelTwoMessages[levelIndex]); 
   }
+  
+  sayMessageForIndex(levelTwoMessages[levelIndex], levelIndex);
 }
 
 void printMiddleMessage(String message) {
@@ -181,6 +206,13 @@ void printBottomMessage(String message) {
   text(message, 0, viewHeight - 80, viewWidth, viewHeight);
 }
 
+void sayMessageForIndex(String message, int index) {
+  if (index == currentIndex) { return; }
+
+  currentIndex = index;
+  TextToSpeech.say(message);  
+}
+
 void drawFace() {
   noFill();
   ellipse(viewWidth/2, viewHeight/2, 250, 400); 
@@ -193,15 +225,67 @@ void drawSelfSteemWithLevel(int level) {
   text("SELF-ESTEEM LEVEL", 0, originHeight, 200, viewHeight);
   
   if (level > 0) {
-    fill(0, 255, 0);
     for (int i = 0; i < level; i++) {
+      fill(highSelfSteemColors[i]);
       rect(50, ((5 - i) * 35) + (viewHeight/4) + 100, 100, 30);
     }
   }
   else {
-    fill(255, 0, 0);
     for (int i = 0; i < abs(level); i++) {
+      fill(lowSelfSteemColors[i]);
       rect(50, (i * 35) + (viewHeight/4) + 310, 100, 30);
+      flashWarningForIndex(i);
     }
   }
+}
+
+void flashWarningForIndex(int index) {
+  color flashColor = color(189,0,38, 50);
+  fill(flashColor);
+  rect(0, 0, viewWidth, viewHeight);
+}
+
+// the text to speech class
+import java.io.IOException;
+
+static class TextToSpeech extends Object {
+
+  // Store the voices, makes for nice auto-complete in Eclipse
+
+  // male voices
+  static final String ALEX = "Alex";
+  static final String BRUCE = "Bruce";
+  static final String FRED = "Fred";
+  static final String JUNIOR = "Junior";
+  static final String RALPH = "Ralph";
+
+  // female voices
+  static final String AGNES = "Agnes";
+  static final String KATHY = "Kathy";
+  static final String PRINCESS = "Princess";
+  static final String VICKI = "Vicki";
+  static final String VICTORIA = "Victoria";
+
+  // throw them in an array so we can iterate over them / pick at random
+  static String[] voices = {
+    ALEX, BRUCE, FRED, JUNIOR, RALPH, AGNES, KATHY,
+    PRINCESS, VICKI, VICTORIA
+  };
+
+  // this sends the "say" command to the terminal with the appropriate args
+  static void say(String script, String voice, int speed) {
+    try {
+      Runtime.getRuntime().exec(new String[] {"say", "-v", voice, "[[rate " + speed + "]]" + script});
+    }
+    catch (IOException e) {
+      System.err.println("IOException");
+    }
+  }
+
+  // Overload the say method so we can call it with fewer arguments and basic defaults
+  static void say(String script) {
+    // 200 seems like a resonable default speed
+    say(script, VICKI, 260);
+  }
+
 }
