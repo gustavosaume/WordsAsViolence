@@ -1,3 +1,10 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
+
 // Run this program only in the Java mode inside the IDE,
 // not on Processing.js (web mode)!!
 /* @pjs preload="blood1.png"; */
@@ -10,7 +17,9 @@ PFont font;
 Capture cam;
 int viewWidth = 1024;
 int viewHeight = 768;
-int cycleDuration = 2400; // Miliseconds
+int cameraWidth = viewWidth - 200;
+int cameraHeight = viewHeight - 100;
+int cycleDuration = 3500; // Miliseconds
 int currentTime;
 int initialTime;
 
@@ -19,7 +28,8 @@ PImage bruiseMedium;
 PImage bruiseHigh;
 
 String[] introMessages = {
-  "WORDS ARE A FORM OF VIOLENCE, SEE FOR YOURSELF...",
+  "WORDS ARE POWERFUL ",
+  "WORDS ARE POWERFUL,\nSEE FOR YOURSELF...",
   "PLACE FACE",
   "PLAY"
 };
@@ -75,6 +85,12 @@ float levelOneInitialTime = introMessages.length * cycleDuration;
 float levelTwoInitialTime = levelOneInitialTime + (levelOneMessages.length * cycleDuration);
 float finalTime = levelTwoInitialTime + (levelTwoMessages.length * cycleDuration);
 int currentIndex = -1;
+int flashCount = 0;
+int flashTimer;
+int flashIndex = 0;
+Boolean shouldFlash = true;
+Boolean shouldFlashForIndex = true;
+color fontGreen = color(198, 248, 66);
 
 void setup() {
   size(1024, 768);
@@ -94,14 +110,18 @@ void setup() {
 }
 
 void draw() {
+  
   if(cam.available()) {
     cam.read();
   }
   
+  fill(153, 51, 250);
+  rect(0, 0, viewWidth, viewHeight);
+   
   pushMatrix();
   scale(-1,1);
   translate(-cam.width, 0);
-  image(cam, 0, 0, viewWidth, viewHeight); 
+  image(cam, 0, 0, cameraWidth, cameraHeight); 
   popMatrix();
   
   currentTime = millis() - initialTime;
@@ -118,6 +138,7 @@ void draw() {
   else {
     // Reset the timer 
     initialTime = millis();
+    currentIndex = -1;
   }
 }
 
@@ -135,18 +156,25 @@ boolean shouldPlayLevelTwo() {
 
 void playIntro() {
   int levelIndex = floor(currentTime/cycleDuration);
-  printMiddleMessage(introMessages[levelIndex]);
-  sayMessageForIndex(introMessages[levelIndex], levelIndex);
   
-  if (levelIndex > 0) {
+  if (levelIndex >= 2) {
     drawFace();
+    printMiddleMessage(introMessages[levelIndex], fontGreen);
+    drawSelfSteemWithLevel(0);
   }
+  else {
+    fill(153, 51, 250);
+    rect(0, 0, viewWidth, viewHeight);
+    printMiddleMessage(introMessages[levelIndex], fontGreen);
+  }
+  
+  sayMessageForIndex(introMessages[levelIndex], levelIndex);
 }
 
 void playLevelOne() {
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length;
   
-  printBottomMessage(levelOneMessages[levelIndex]);
+  printBottomMessage(levelOneMessages[levelIndex], fontGreen);
   sayMessageForIndex(levelOneMessages[levelIndex], levelIndex);
   
   if (levelIndex > 2 && levelIndex < levelOneMessages.length - 1) {
@@ -159,50 +187,56 @@ void playLevelOne() {
 void playLevelTwo() {
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length - levelOneMessages.length;
   
-  
+  if (flashIndex != levelIndex) {
+    flashIndex = levelIndex;
+    flashCount = 0; 
+  } 
   if (levelIndex > 0 && levelIndex < levelTwoMessages.length - 1) {
     drawSelfSteemWithLevel(7 - levelIndex); 
   }
   
   // Add Buises
-  if (levelIndex > 6 && levelIndex < levelTwoMessages.length - 1) {
+  if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
     tint(255, 50);
     image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 150);
     tint(255);
   }
   
-  if (levelIndex > 7 && levelIndex < levelTwoMessages.length - 1) {
+  if (levelIndex > 9 && levelIndex < levelTwoMessages.length - 1) {
     tint(255, 50);
     image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 130, 100);
     tint(255);
   }
   
-  if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
+  if (levelIndex > 10 && levelIndex < levelTwoMessages.length - 1) {
     tint(255, 120);
     image(bruiseHigh, (viewWidth / 2) - 30, (viewHeight/2) - 90, 170, 150);
     tint(255);
   }
   
   if (levelIndex < levelTwoMessages.length - 1) {
-    printBottomMessage(levelTwoMessages[levelIndex]);
+    printBottomMessage(levelTwoMessages[levelIndex], fontGreen);
     drawFace(); 
   }
   else {
-     printMiddleMessage(levelTwoMessages[levelIndex]); 
+     printMiddleMessage(levelTwoMessages[levelIndex], fontGreen); 
   }
   
+  if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
+     flashWarning(levelIndex - 7);
+  }
   sayMessageForIndex(levelTwoMessages[levelIndex], levelIndex);
 }
 
-void printMiddleMessage(String message) {
+void printMiddleMessage(String message, color messageColor) {
   textSize(32);
-  fill(255);
-  text(message, 0, (viewHeight/2) - 40, viewWidth, 80); 
+  fill(messageColor);
+  text(message, 0, (viewHeight/2) - 40, viewWidth, 80);
 }
 
-void printBottomMessage(String message) {
+void printBottomMessage(String message, color messageColor) {
   textSize(32);
-  fill(255);
+  fill(messageColor);
   text(message, 0, viewHeight - 80, viewWidth, viewHeight);
 }
 
@@ -219,10 +253,10 @@ void drawFace() {
 }
 
 void drawSelfSteemWithLevel(int level) {
-  fill(255);
+  fill(114, 247, 154 );
   textSize(26);
   int originHeight = (viewHeight/4);
-  text("SELF-ESTEEM LEVEL", 0, originHeight, 200, viewHeight);
+  text("SELF-ESTEEM LEVEL\n...............", 0, originHeight, 200, viewHeight);
   
   if (level > 0) {
     for (int i = 0; i < level; i++) {
@@ -234,15 +268,31 @@ void drawSelfSteemWithLevel(int level) {
     for (int i = 0; i < abs(level); i++) {
       fill(lowSelfSteemColors[i]);
       rect(50, (i * 35) + (viewHeight/4) + 310, 100, 30);
-      flashWarningForIndex(i);
     }
   }
 }
 
-void flashWarningForIndex(int index) {
-  color flashColor = color(189,0,38, 50);
-  fill(flashColor);
-  rect(0, 0, viewWidth, viewHeight);
+void flashWarning(int times) {
+  if (flashCount == times) {
+    flashTimer = 0;
+    shouldFlash = true;
+    return;
+  }
+  
+  if (flashTimer == 0) {
+    flashTimer = millis(); 
+  }
+  
+  if (shouldFlash) {
+    fill(color(189, 0, 38));
+    rect(0, 0, viewWidth, viewHeight);
+  }
+  
+  if (millis() - flashTimer > 200) {
+    flashCount++;
+    flashTimer = millis();
+    shouldFlash = !shouldFlash;
+  }
 }
 
 // the text to speech class
@@ -285,7 +335,7 @@ static class TextToSpeech extends Object {
   // Overload the say method so we can call it with fewer arguments and basic defaults
   static void say(String script) {
     // 200 seems like a resonable default speed
-    say(script, VICKI, 260);
+    say(script, VICKI, 270);
   }
 
 }
