@@ -15,6 +15,12 @@ import processing.video.*;
 
 PFont font;
 Capture cam;
+AudioPlayer backgroundOnePlayer;
+AudioPlayer backgroundTwoPlayer;
+AudioPlayer effectPlayer;
+Minim minim;//audio context
+
+
 int viewWidth = 1024;
 int viewHeight = 768;
 int cameraWidth = viewWidth - 200;
@@ -28,7 +34,6 @@ PImage bruiseMedium;
 PImage bruiseHigh;
 
 String[] introMessages = {
-  "WORDS ARE POWERFUL ",
   "WORDS ARE POWERFUL,\nSEE FOR YOURSELF...",
   "PLACE FACE",
   "PLAY"
@@ -36,8 +41,8 @@ String[] introMessages = {
 
 String[] levelOneMessages = {
   "LEVEL 1",
-  "A MAN WHO HAS LOTS OF SEX IS CALLED...",
-  "SAY WITH ME",
+  "A MAN WHO HAS LOTS OF SEX CAN BE CALLED...",
+  "[REPEAT THE FOLLOWING WORDS IN YOUR HEAD]",
   "STUD",
   "PLAYER",
   "STALLION",
@@ -102,6 +107,12 @@ void setup() {
   textFont(font, 32);
   textAlign(CENTER);
   
+  // configure music
+  minim = new Minim(this);
+//  backgroundOnePlayer = minim.loadFile("jingle.aif");
+//  backgroundTwoPlayer = minim.loadFile("jingle.aif");
+  
+  // configure bruises
   bruiseLow = loadImage("blood2.png");
   bruiseMedium = loadImage("blood1.png");
   bruiseHigh = loadImage("blood3.png");
@@ -155,6 +166,7 @@ boolean shouldPlayLevelTwo() {
 }
 
 void playIntro() {
+//  backgroundOnePlayer.loop();
   int levelIndex = floor(currentTime/cycleDuration);
   
   if (levelIndex >= 2) {
@@ -174,7 +186,12 @@ void playIntro() {
 void playLevelOne() {
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length;
   
-  printBottomMessage(levelOneMessages[levelIndex], fontGreen);
+  if (levelIndex == 2) {
+    printBottomMessage(levelOneMessages[levelIndex], color(255));
+  }
+  else {
+    printBottomMessage(levelOneMessages[levelIndex], fontGreen);
+  }
   sayMessageForIndex(levelOneMessages[levelIndex], levelIndex);
   
   if (levelIndex > 2 && levelIndex < levelOneMessages.length - 1) {
@@ -293,6 +310,14 @@ void flashWarning(int times) {
     flashTimer = millis();
     shouldFlash = !shouldFlash;
   }
+}
+
+void stop() {
+  backgroundOnePlayer.close();
+  backgroundTwoPlayer.close();
+  effectPlayer.close();
+  minim.stop();
+  super.stop();
 }
 
 // the text to speech class
