@@ -39,6 +39,8 @@ String[] introMessages = {
   "PLAY"
 };
 
+String[] introEffects;
+
 String[] levelOneMessages = {
   "LEVEL 1",
   "A MAN WHO HAS LOTS OF SEX CAN BE CALLED...",
@@ -51,6 +53,8 @@ String[] levelOneMessages = {
   "DON JUAN",
   "CONGRATULATIONS"
 };
+
+String[] levelOneEffects = {};
 
 String[] levelTwoMessages = {
   "LEVEL 2",
@@ -67,6 +71,8 @@ String[] levelTwoMessages = {
   "WHORE",
   "GAME OVER"  
 };
+
+String[] levelTwoEffects = {};
 
 color[] highSelfSteemColors = {
   color(173,221,142),  // Light green
@@ -109,8 +115,8 @@ void setup() {
   
   // configure music
   minim = new Minim(this);
-//  backgroundOnePlayer = minim.loadFile("jingle.aif");
-//  backgroundTwoPlayer = minim.loadFile("jingle.aif");
+  backgroundOnePlayer = minim.loadFile("level1bg.mp3");
+  backgroundTwoPlayer = minim.loadFile("level2bg.mp3");
   
   // configure bruises
   bruiseLow = loadImage("blood2.png");
@@ -166,7 +172,6 @@ boolean shouldPlayLevelTwo() {
 }
 
 void playIntro() {
-//  backgroundOnePlayer.loop();
   int levelIndex = floor(currentTime/cycleDuration);
   
   if (levelIndex >= 2) {
@@ -184,6 +189,9 @@ void playIntro() {
 }
 
 void playLevelOne() {
+  if (!backgroundOnePlayer.isLooping()) {
+     backgroundOnePlayer.loop(); 
+  }
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length;
   
   if (levelIndex == 2) {
@@ -202,6 +210,12 @@ void playLevelOne() {
 }
 
 void playLevelTwo() {
+  if (backgroundOnePlayer.isLooping()) {
+    backgroundOnePlayer.pause(); 
+  }
+  if (!backgroundTwoPlayer.isLooping()) {
+    backgroundTwoPlayer.loop();
+  }
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length - levelOneMessages.length;
   
   if (flashIndex != levelIndex) {
