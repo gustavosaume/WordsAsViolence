@@ -242,7 +242,7 @@ void playLevelTwo() {
   // Add Buises
   if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
     playEffectForLevel("slapOne.mp3", levelIndex);
-    tint(255, 50);
+    tint(255, 90);
     image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 150);
     tint(255);
     saveFrameForLevel(levelIndex);
@@ -250,16 +250,16 @@ void playLevelTwo() {
   
   if (levelIndex > 9 && levelIndex < levelTwoMessages.length - 1) {
     playEffectForLevel("slapOne.mp3", levelIndex);
-    tint(255, 50);
-    image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 130, 100);
+    tint(255, 90);
+    image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 170, 120);
     tint(255);
     saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex > 10 && levelIndex < levelTwoMessages.length - 1) {
     playEffectForLevel("slapOne.mp3", levelIndex);
-    tint(255, 120);
-    image(bruiseHigh, (viewWidth / 2) - 30, (viewHeight/2) - 90, 170, 150);
+    tint(255, 150);
+    image(bruiseHigh, (viewWidth / 2) - 10, (viewHeight/2) - 170, 180, 180);
     tint(255);
     saveFrameForLevel(levelIndex);
   }
