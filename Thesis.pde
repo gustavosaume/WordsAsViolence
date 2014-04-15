@@ -214,6 +214,9 @@ void playLevelOne() {
   if (levelIndex > 2 && levelIndex < levelOneMessages.length - 1) {
     drawSelfSteemWithLevel(levelIndex - 2); 
   }
+  else {
+    drawSelfSteemWithLevel(0); 
+  }
   
   drawFace();
 }
