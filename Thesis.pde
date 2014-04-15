@@ -28,7 +28,7 @@ int viewWidth = 1024;
 int viewHeight = 768;
 int cameraWidth = viewWidth - 200;
 int cameraHeight = viewHeight - 100;
-int cycleDuration = 3500; // Miliseconds
+int cycleDuration = 4000; // Miliseconds
 int currentTime;
 int initialTime;
 
@@ -413,7 +413,7 @@ static class TextToSpeech extends Object {
   // Overload the say method so we can call it with fewer arguments and basic defaults
   static void say(String script) {
     // 200 seems like a resonable default speed
-    say(script, VICKI, 270);
+    say(script, VICKI, 210);
   }
 
 }
