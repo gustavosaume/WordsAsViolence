@@ -281,7 +281,7 @@ void playLevelTwo() {
 void printMiddleMessage(String message, color messageColor) {
   textSize(32);
   fill(messageColor);
-  text(message, 0, (viewHeight/2) - 40, viewWidth, 80);
+  text(message, 0, (viewHeight/2) - 60, viewWidth, 80);
 }
 
 void printBottomMessage(String message, color messageColor) {
@@ -299,7 +299,7 @@ void sayMessageForIndex(String message, int index) {
 
 void drawFace() {
   noFill();
-  ellipse(viewWidth/2, viewHeight/2, 250, 400); 
+  ellipse(viewWidth/2, (viewHeight/2) - 60, 300, 550); 
 }
 
 void drawSelfSteemWithLevel(int level) {
