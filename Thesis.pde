@@ -21,6 +21,7 @@ AudioPlayer effectPlayer;
 Minim minim;//audio context
 int lastLevelPlayed;
 String currentEffect;
+int lastLevelSaved;
 
 
 int viewWidth = 1024;
@@ -160,6 +161,7 @@ void draw() {
     currentIndex = -1;
     lastLevelPlayed = -1;
     currentEffect = "";
+    lastLevelSaved = -1;
     
     backgroundTwoPlayer.pause();
     backgroundTwoPlayer.rewind();
@@ -240,6 +242,7 @@ void playLevelTwo() {
     tint(255, 50);
     image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 150);
     tint(255);
+    saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex > 9 && levelIndex < levelTwoMessages.length - 1) {
@@ -247,6 +250,7 @@ void playLevelTwo() {
     tint(255, 50);
     image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 130, 100);
     tint(255);
+    saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex > 10 && levelIndex < levelTwoMessages.length - 1) {
@@ -254,6 +258,7 @@ void playLevelTwo() {
     tint(255, 120);
     image(bruiseHigh, (viewWidth / 2) - 30, (viewHeight/2) - 90, 170, 150);
     tint(255);
+    saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex < levelTwoMessages.length - 1) {
@@ -348,6 +353,13 @@ void playEffectForLevel(String effect, int level) {
     effectPlayer.play();
     lastLevelPlayed = level;
   } 
+}
+
+void saveFrameForLevel(int level) {
+  if (lastLevelSaved == level) { return; }
+  
+  lastLevelSaved = level;
+  saveFrame("line-######.jpg"); 
 }
 
 void stop() {
