@@ -183,7 +183,7 @@ boolean shouldPlayLevelTwo() {
 void playIntro() {
   int levelIndex = floor(currentTime/cycleDuration);
   
-  if (levelIndex >= 2) {
+  if (levelIndex >= 1) {
     drawFace();
     printMiddleMessage(introMessages[levelIndex], fontGreen);
     drawSelfSteemWithLevel(0);
