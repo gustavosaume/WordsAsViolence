@@ -17,11 +17,14 @@ PFont font;
 Capture cam;
 AudioPlayer backgroundOnePlayer;
 AudioPlayer backgroundTwoPlayer;
+AudioPlayer backgroundThreePlayer;
 AudioPlayer effectPlayer;
 Minim minim;//audio context
-int lastLevelPlayed;
+int effectPlayerOneLastLevelPlayed = -1;
+int effectPlayerOneLastIndexPlayed = -1;
 String currentEffect;
 int lastLevelSaved;
+int currentLevel = -1;
 
 
 int viewWidth = 1024;
@@ -42,7 +45,11 @@ String[] introMessages = {
   "PLAY"
 };
 
-String[] introEffects;
+String[] introEffects = {
+  "start.mp3",
+  "levelStart.mp3",
+  "backgroundIntro.mp3"
+};
 
 String[] levelOneMessages = {
   "LEVEL 1",
@@ -57,7 +64,18 @@ String[] levelOneMessages = {
   "CONGRATULATIONS"
 };
 
-String[] levelOneEffects = {};
+String[] levelOneEffects = {
+  "levelStart.mp3",
+  "", // no effect
+  "pulse.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "congratulations.mp3"
+};
 
 String[] levelTwoMessages = {
   "LEVEL 2",
@@ -75,7 +93,21 @@ String[] levelTwoMessages = {
   "GAME OVER"  
 };
 
-String[] levelTwoEffects = {};
+String[] levelTwoEffects = {
+  "levelStart.mp3",
+  "",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "newWord.mp3",
+  "slapOne.mp3",
+  "slapOne.mp3",
+  "slapOne.mp3",
+  "gameOver.mp3"  
+};
 
 color[] highSelfSteemColors = {
   color(173,221,142),  // Light green
@@ -120,6 +152,8 @@ void setup() {
   minim = new Minim(this);
   backgroundOnePlayer = minim.loadFile("level1bg.mp3");
   backgroundTwoPlayer = minim.loadFile("level2bg.mp3");
+  backgroundThreePlayer = minim.loadFile("error.mp3");
+  backgroundThreePlayer.setGain(0.3);
   
   // configure bruises
   bruiseLow = loadImage("blood2.png");
@@ -159,12 +193,15 @@ void draw() {
     // Reset the timer 
     initialTime = millis();
     currentIndex = -1;
-    lastLevelPlayed = -1;
+    effectPlayerOneLastLevelPlayed = -1;
+    effectPlayerOneLastIndexPlayed = -1;
     currentEffect = "";
     lastLevelSaved = -1;
     
     backgroundTwoPlayer.pause();
     backgroundTwoPlayer.rewind();
+    backgroundThreePlayer.pause();
+    backgroundThreePlayer.rewind();
   }
 }
 
@@ -180,9 +217,11 @@ boolean shouldPlayLevelTwo() {
   return levelTwoInitialTime <= currentTime && currentTime < finalTime;
 }
 
-void playIntro() {
+void playIntro() {  
   int levelIndex = floor(currentTime/cycleDuration);
-  
+
+  playEffectForLevel(introEffects[levelIndex], 0, levelIndex);
+
   if (levelIndex >= 1) {
     drawFace();
     printMiddleMessage(introMessages[levelIndex], fontGreen);
@@ -198,10 +237,12 @@ void playIntro() {
 }
 
 void playLevelOne() {
-  if (!backgroundOnePlayer.isPlaying()) {
+    if (!backgroundOnePlayer.isPlaying()) {
      backgroundOnePlayer.loop(); 
   }
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length;
+  
+  playEffectForLevel(levelOneEffects[levelIndex], 1, levelIndex);
   
   if (levelIndex == 2) {
     printBottomMessage(levelOneMessages[levelIndex], color(255));
@@ -226,10 +267,27 @@ void playLevelTwo() {
     backgroundOnePlayer.pause();
     backgroundOnePlayer.rewind(); 
   }
-  if (!backgroundTwoPlayer.isPlaying()) {
-    backgroundTwoPlayer.loop();
-  }
+  
   int levelIndex = floor(currentTime/cycleDuration) - introMessages.length - levelOneMessages.length;
+  
+  if (levelIndex < 8) {
+    if (!backgroundTwoPlayer.isPlaying()) {
+      backgroundTwoPlayer.loop();
+    }  
+  }
+  else if (levelIndex >= 9 && levelIndex <= 11){
+    if (!backgroundThreePlayer.isPlaying()) {
+      backgroundTwoPlayer.pause();
+      backgroundThreePlayer.loop();
+    } 
+  }
+  else {
+    backgroundTwoPlayer.pause();
+    backgroundThreePlayer.pause();
+  }
+  
+  
+  playEffectForLevel(levelTwoEffects[levelIndex], 2, levelIndex);
   
   if (flashIndex != levelIndex) {
     flashIndex = levelIndex;
@@ -241,7 +299,6 @@ void playLevelTwo() {
   
   // Add Buises
   if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
-    playEffectForLevel("slapOne.mp3", levelIndex);
     tint(255, 90);
     image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 150);
     tint(255);
@@ -249,7 +306,6 @@ void playLevelTwo() {
   }
   
   if (levelIndex > 9 && levelIndex < levelTwoMessages.length - 1) {
-    playEffectForLevel("slapOne.mp3", levelIndex);
     tint(255, 90);
     image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 170, 120);
     tint(255);
@@ -257,7 +313,6 @@ void playLevelTwo() {
   }
   
   if (levelIndex > 10 && levelIndex < levelTwoMessages.length - 1) {
-    playEffectForLevel("slapOne.mp3", levelIndex);
     tint(255, 150);
     image(bruiseHigh, (viewWidth / 2) - 10, (viewHeight/2) - 170, 180, 180);
     tint(255);
@@ -345,16 +400,24 @@ void flashWarning(int times) {
   }
 }
 
-void playEffectForLevel(String effect, int level) {
+void playEffectForLevel(String effect, int level, int index) {
+  if (effect.length() == 0) { return; }
+  
   if (currentEffect != effect) {
+    if (effectPlayer != null) { effectPlayer.pause(); }
     effectPlayer = minim.loadFile(effect);
     currentEffect = effect; 
   }
  
-  if (lastLevelPlayed != level) {
+  if (effectPlayerOneLastLevelPlayed < level) {
+    effectPlayerOneLastIndexPlayed = -1;
+  }
+  if (effectPlayerOneLastIndexPlayed < index) {
+    effectPlayer.pause();
     effectPlayer.rewind();
     effectPlayer.play();
-    lastLevelPlayed = level;
+    effectPlayerOneLastLevelPlayed = level;
+    effectPlayerOneLastIndexPlayed = index;
   } 
 }
 
