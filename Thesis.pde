@@ -299,22 +299,22 @@ void playLevelTwo() {
   
   // Add Buises
   if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
-    tint(255, 90);
-    image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 150);
+    tint(255, 150);
+    image(bruiseLow, (viewWidth / 2) + 30, (viewHeight/2) + 20, 100, 255);
     tint(255);
     saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex > 9 && levelIndex < levelTwoMessages.length - 1) {
-    tint(255, 90);
-    image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 170, 120);
+    tint(255, 150);
+    image(bruiseHigh, (viewWidth / 2) - 150, (viewHeight/2) + 30, 170, 255);
     tint(255);
     saveFrameForLevel(levelIndex);
   }
   
   if (levelIndex > 10 && levelIndex < levelTwoMessages.length - 1) {
-    tint(255, 150);
-    image(bruiseHigh, (viewWidth / 2) - 10, (viewHeight/2) - 170, 180, 180);
+    tint(255, 190);
+    image(bruiseHigh, (viewWidth / 2) - 10, (viewHeight/2) - 170, 180, 255);
     tint(255);
     saveFrameForLevel(levelIndex);
   }
@@ -328,7 +328,7 @@ void playLevelTwo() {
   }
   
   if (levelIndex > 8 && levelIndex < levelTwoMessages.length - 1) {
-     flashWarning(levelIndex - 7);
+     flashWarning(levelIndex);
   }
   sayMessageForIndex(levelTwoMessages[levelIndex], levelIndex);
 }
@@ -377,27 +377,11 @@ void drawSelfSteemWithLevel(int level) {
   }
 }
 
-void flashWarning(int times) {
-  if (flashCount == times) {
-    flashTimer = 0;
-    shouldFlash = true;
-    return;
-  }
-  
-  if (flashTimer == 0) {
-    flashTimer = millis(); 
-  }
-  
-  if (shouldFlash) {
-    fill(color(189, 0, 38));
-    rect(0, 0, viewWidth, viewHeight);
-  }
-  
-  if (millis() - flashTimer > 200) {
-    flashCount++;
-    flashTimer = millis();
-    shouldFlash = !shouldFlash;
-  }
+void flashWarning(int level) {
+  noStroke();
+  fill(color(189, 0, 38, 50 * (level - 8)));
+  rect(200, 0, viewWidth - 200, viewHeight - 100);
+  stroke(0);
 }
 
 void playEffectForLevel(String effect, int level, int index) {
