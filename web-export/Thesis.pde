@@ -36,6 +36,8 @@ int cameraHeight = viewHeight - 100;
 int cycleDuration = 4500; // Miliseconds
 int currentTime;
 int initialTime;
+Boolean isLooping = false;
+
 
 PImage bruiseLow;
 PImage bruiseMedium;
@@ -165,10 +167,14 @@ void setup() {
 }
 
 void draw() {
-  if (!video.available) return;
-  
   fill(153, 51, 250);
   rect(0, 0, viewWidth, viewHeight);
+  
+  if (!video.available) {
+    printMiddleMessage("[Please enable video]", fontGreen);
+    initialTime = millis();
+    return; 
+  }
    
   pushMatrix();
   translate(width,0);
@@ -199,6 +205,7 @@ void draw() {
     backgroundTwoPlayer.rewind();
     backgroundThreePlayer.pause();
     backgroundThreePlayer.rewind();
+    isLooping = false;
   }
 }
 
@@ -228,9 +235,14 @@ void playIntro() {
     fill(153, 51, 250);
     rect(0, 0, viewWidth, viewHeight);
     printMiddleMessage(introMessages[levelIndex], fontGreen);
+    printBottomMessage("[Click here to start]", color(255));
   }
   
   sayMessageForIndex(introMessages[levelIndex], levelIndex);
+  
+  if (!isLooping) {
+    noLoop(); 
+  }
 }
 
 void playLevelOne() {
@@ -408,10 +420,25 @@ void saveFrameForLevel(int level) {
 }
 
 void stop() {
+  backgroundOnePlayer.pause();
+  backgroundOnePlayer.rewind();
   backgroundOnePlayer.close();
+  backgroundTwoPlayer.pause();
+  backgroundTwoPlayer.rewind();
   backgroundTwoPlayer.close();
+  effectPlayer.pause();
+  effectPlayer.rewind();
   effectPlayer.close();
   minim.stop();
   super.stop();
+}
+
+void mouseReleased() {
+  if (!video.available) { return; }
+  if (!isLooping) {
+    initialTime = millis() - 4000;
+    isLooping = true;
+    loop();
+  }
 }
 
